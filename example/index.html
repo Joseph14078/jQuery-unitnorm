@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<head>
+    <title>Unit Normalizer Examples</title>
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous">
+    </script>
+    <script src="../unitnormalizer.js"></script>
+</head>
+<body>
+    <form>
+        <h1>Unit Normalizer Examples</h1>
+        <h2>Temperature</h2>
+        <h3>Input (Farenheit)</h3>
+        <input id="temp-in" name="temp" class="normalize" type="number" step="0.1"
+            data-unittype="temperature" data-unit="celcius"
+            data-unitpref="farenheit" />
+        <h3>Output (Celcius)</h3>
+        <span id="temp-out">N/A</span>
+    </form>
+    <script>
+        $('#temp-in').change(function() {
+            $("#temp-out").text($(this).val());
+        });
+
+        $('.normalize').unitnorm();
+    </script>
+</body>
