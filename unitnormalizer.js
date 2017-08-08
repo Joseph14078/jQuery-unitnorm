@@ -1,7 +1,25 @@
 (function($) {
     var types = {
-        // 'length": {},
         // "volume": {},
+        "length": {
+            "name": "Length",
+            "suffix": "",
+            "base": "meters",
+            "units": {
+                "meters": {
+                    "name": "Meters",
+                    "suffix": "m",
+                    "from": function(m) { return m; },
+                    "to": function(m) { return m; }
+                },
+                "feet": {
+                    "name": "Feet",
+                    "suffix": "ft",
+                    "from": function(ft) { return ft * 0.3048; }, // unit -> base
+                    "to": function(m) { return m / 0.3048; }, // base -> unit
+                }
+            }
+        },
         "temperature": {
             "name": "Temperature",
             "suffix": "°",
@@ -9,32 +27,70 @@
             "units": {
                 "celcius": {
                     "name": "Celcius",
+                    "inputType": "number",
                     "suffix": "C",
                     "from": function(c) { return c; }, // unit -> base
                     "to": function(c) { return c; } // base -> unit
                 },
                 "farenheit": {
                     "name": "Farenheit",
+                    "inputType": "number",
                     "suffix": "F",
                     "from": function(f) { return (f - 32) * (5.0/9.0); }, // unit -> base 
                     "to": function(c) { return (c * (9.0/5.0)) + 32; }, // base -> unit
                 },
                 "kelvin": {
                     "name": "Kelvin",
+                    "inputType": "number",
                     "suffix": "K",
                     "from": function(k) { return k - 273.15; },
                     "to": function (c) { return c + 273.15; }
                 }
             }
         },
-        // "time": {},
+        "time": {
+            "name": "Time",
+            "suffix": "",
+            "base": "unix",
+            "units": {
+                "unix": {
+                    "name": "Unix Timestamp (UTC)",
+                    "inputType": "number",
+                    "from": function(u) { return u; },
+                    "to": function(u) { return u; }
+                },
+                "iso": {
+                    "name": "ISO Timestamp (Local)",
+                    "inputType": "datetime-local",
+                    "from": function(iso) { // unit (local) -> base (utc)
+                        return (new Date(iso)).getTime();
+                    },
+                    "to": function(u) {
+                        var isoString = (new Date(parseInt(u))).toISOString();
+                        isoString = isoString.substring(0, isoString.length - 2);
+                        return isoString;
+                    }
+                }
+            }
+        },
         // "location": {}
     }
 
     var suppressErrors = 0;
 
     $.fn.unitnorm = function() {
+        // selectors for multiple elements are handled weirdly by jquery
+        // have to iterate manually
+        if (this.length > 1) {
+            return this.each(function() {
+                $(this).unitnorm();
+            });
+        }
+
         var $original = this;
+
+        if (typeof $original.data('unitclone') != 'undefined')
+            return;
 
         // 'unittype' is the type of value represented by the field
         // e.g. temperature, time, mass, etc.
@@ -49,7 +105,7 @@
                     console.log('unitnormalizer:    - ' + typeKeys[i]);
                 }
             }
-            return false;
+            return;
         }
 
         // 'unit' is the unit that all values will be converted to for the original field
@@ -70,6 +126,7 @@
 
         // clone the input
         var $clone = $original.clone();
+        $original.data('clone', $clone)
         // give the clone a reference back to the original element
         // used for when the clone's value is changed
         $clone.data('unitoriginal', $original);
@@ -79,6 +136,16 @@
         // remove unit attribute to avoid confusion
         // (unitPref represents clone's unit)
         $clone.removeAttr('data-unit');
+
+        var cloneUnit = $clone.data('unitpref');
+        var newInputType = types[unitType].units[cloneUnit].inputType;
+        if (newInputType) $clone.attr('type', newInputType);
+
+        var originalVal = $original.val();
+        var originalValBase = types[unitType].units[unit].from(originalVal);
+        var cloneVal = types[unitType].units[cloneUnit].to(originalValBase)
+        $clone.val(cloneVal);     
+
         // insert clone after original element
         $original.after($clone);
         // hide the original
@@ -89,20 +156,18 @@
             var $clone = $(this);
             var $original = $clone.data('unitoriginal');
             
-            var type = $clone.data('unittype');
+            var unitType = $clone.data('unittype');
 
             var cloneUnit = $clone.data('unitpref');
             var cloneVal = $clone.val();
 
-            var cloneValBase = types[type].units[cloneUnit].from(cloneVal); // unit -> base
+            var cloneValBase = types[unitType].units[cloneUnit].from(cloneVal); // unit -> base
  
             var originalUnit = $original.data('unit');
-            var originalVal = types[type].units[originalUnit].to(cloneValBase);
+            var originalVal = types[unitType].units[originalUnit].to(cloneValBase);
 
             $original.val(originalVal).change();
         });
-
         return true;
     };
-
 }(jQuery));

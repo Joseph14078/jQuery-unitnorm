@@ -11,17 +11,45 @@
 <body>
     <form>
         <h1>Unit Normalizer Examples</h1>
+
         <h2>Temperature</h2>
         <h3>Input (Farenheit)</h3>
         <input id="temp-in" name="temp" class="normalize" type="number" step="0.1"
             data-unittype="temperature" data-unit="celcius"
-            data-unitpref="farenheit" />
+            data-unitpref="farenheit"
+            value="215" />
         <h3>Output (Celcius)</h3>
         <span id="temp-out">N/A</span>
+
+        <h2>Length</h2>
+        <h3>Input (Feet)</h3>
+        <input id="length-in" name="length" class="normalize" type="number" step="0.1"
+            data-unittype="length" data-unit="meters"
+            data-unitpref="feet"
+            value="10" />
+        <h3>Output (Meters)</h3>
+        <span id="length-out">N/A</span>
+
+        <h2>Time</h2>
+        <h3>Input (ISO [Local])</h3>
+        <input id="time-in" name="time" class="normalize" type="number"
+            data-unittype="time" data-unit="unix"
+            data-unitpref="iso"
+            value="1502085360000" />
+        <h3>Output (UNIX Timestamp [UTC])</h3>
+        <span id="time-out">N/A</span>
     </form>
     <script>
         $('#temp-in').change(function() {
             $("#temp-out").text($(this).val());
+        });
+
+        $('#length-in').change(function() {
+            $("#length-out").text($(this).val());
+        });
+
+        $('#time-in').change(function() {
+            $("#time-out").text($(this).val());
         });
 
         $('.normalize').unitnorm();
