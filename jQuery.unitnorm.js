@@ -65,7 +65,7 @@
                     "from": function(iso) { // unit (local) -> base (utc)
                         return (new Date(iso)).getTime();
                     },
-                    "to": function(u) {
+                    "to": function(u) { // base (utc) -> unit (local)
                         var isoString = (new Date(parseInt(u))).toISOString();
                         isoString = isoString.substring(0, isoString.length - 2);
                         return isoString;
@@ -87,10 +87,22 @@
             });
         }
 
+        // -----
+
+        // just makes things easier to read
         var $original = this;
 
+        // -----
+
+        // if the original already is normalized, skip
         if (typeof $original.data('unitclone') != 'undefined')
             return;
+
+        // if this is a clone, also skip
+        if (typeof $original.data('unitoriginal') != 'undefined')
+            return;
+
+        // -----
 
         // 'unittype' is the type of value represented by the field
         // e.g. temperature, time, mass, etc.
@@ -116,22 +128,20 @@
         var unitPref = $original.data('unitpref') || unit;
         // 'unitsavail' are the units that the user will be able to choose from
         // if undefined, defaults to just the preferred unit
-        var unitsAvail = $original.data('unitsavail');
-        if (typeof unitsAvail == 'undefined')
-            unitsAvail = [unitPref];
-        else
-            unitsAvail = unitsAvail.split(',');
+        var unitsAvail = $original.data('unitsavail') || unitPref;
+        unitsAvail = unitsAvail.split(',');
 
         // -----
 
         // clone the input
         var $clone = $original.clone();
-        $original.data('clone', $clone)
+        $original.data('unitclone', $clone)
         // give the clone a reference back to the original element
         // used for when the clone's value is changed
         $clone.data('unitoriginal', $original);
         // remvove name so that the clone doesn't get submitted
         $clone.removeAttr('name');
+        // also remove id to avoid confusion (!!!!)
         $clone.removeAttr('id');
         // remove unit attribute to avoid confusion
         // (unitPref represents clone's unit)
@@ -141,16 +151,31 @@
         var newInputType = types[unitType].units[cloneUnit].inputType;
         if (newInputType) $clone.attr('type', newInputType);
 
+        // -----
+
+        // if the original field already has a value, make sure to convert it for the new field 
         var originalVal = $original.val();
         var originalValBase = types[unitType].units[unit].from(originalVal);
         var cloneVal = types[unitType].units[cloneUnit].to(originalValBase)
-        $clone.val(cloneVal);     
+        $clone.val(cloneVal);  
+
+        // -----
+
+        // if input has a unit description, it needs to be changed
+        var unitDesc = $clone.attr('aria-describedby');
+        if (typeof unitDesc != undefined) {
+            var cloneUnitName = types[unitType].units[cloneUnit].name;
+            $('#' + unitDesc).text(cloneUnitName);
+        }
+
+        // -----
 
         // insert clone after original element
         $original.after($clone);
         // hide the original
         $original.hide();
 
+        // here's where the ~M~A~G~I~C~ happens
         $clone.change(function(e) {
             // 'this' now represents the clone
             var $clone = $(this);

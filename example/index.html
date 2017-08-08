@@ -6,32 +6,36 @@
         integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous">
     </script>
-    <script src="../unitnormalizer.js"></script>
+    <script src="../jQuery.unitnorm.js"></script>
 </head>
 <body>
     <form>
         <h1>Unit Normalizer Examples</h1>
 
         <h2>Temperature</h2>
-        <h3>Input (Farenheit)</h3>
+        <h3>Input</h3>
         <input id="temp-in" name="temp" class="normalize" type="number" step="0.1"
             data-unittype="temperature" data-unit="celcius"
             data-unitpref="farenheit"
+            aria-describedby="temp-in-desc"
             value="215" />
+        <span id="temp-in-desc">Celcius</span>
         <h3>Output (Celcius)</h3>
         <span id="temp-out">N/A</span>
 
         <h2>Length</h2>
-        <h3>Input (Feet)</h3>
+        <h3>Input</h3>
         <input id="length-in" name="length" class="normalize" type="number" step="0.1"
             data-unittype="length" data-unit="meters"
             data-unitpref="feet"
+            aria-describedby="length-in-desc"
             value="10" />
+        <span id="length-in-desc">Meters</span>
         <h3>Output (Meters)</h3>
         <span id="length-out">N/A</span>
 
         <h2>Time</h2>
-        <h3>Input (ISO [Local])</h3>
+        <h3>Input</h3>
         <input id="time-in" name="time" class="normalize" type="number"
             data-unittype="time" data-unit="unix"
             data-unitpref="iso"
