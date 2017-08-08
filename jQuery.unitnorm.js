@@ -9,14 +9,14 @@
                 "meters": {
                     "name": "Meters",
                     "suffix": "m",
-                    "from": function(m) { return m; },
-                    "to": function(m) { return m; }
+                    "from": function(m) { return parseFloat(m); },
+                    "to": function(m) { return parseFloat(m); }
                 },
                 "feet": {
                     "name": "Feet",
                     "suffix": "ft",
-                    "from": function(ft) { return ft * 0.3048; }, // unit -> base
-                    "to": function(m) { return m / 0.3048; }, // base -> unit
+                    "from": function(ft) { return parseFloat(ft) * 0.3048; }, // unit -> base
+                    "to": function(m) { return parseFloat(m) / 0.3048; }, // base -> unit
                 }
             }
         },
@@ -29,22 +29,22 @@
                     "name": "Celcius",
                     "inputType": "number",
                     "suffix": "C",
-                    "from": function(c) { return c; }, // unit -> base
-                    "to": function(c) { return c; } // base -> unit
+                    "from": function(c) { return parseFloat(c); }, // unit -> base
+                    "to": function(c) { return parseFloat(c); } // base -> unit
                 },
                 "farenheit": {
                     "name": "Farenheit",
                     "inputType": "number",
                     "suffix": "F",
-                    "from": function(f) { return (f - 32) * (5.0/9.0); }, // unit -> base 
-                    "to": function(c) { return (c * (9.0/5.0)) + 32; }, // base -> unit
+                    "from": function(f) { return (parseFloat(f) - 32) * (5.0/9.0); }, // unit -> base 
+                    "to": function(c) { return (parseFloat(c) * (9.0/5.0)) + 32; }, // base -> unit
                 },
                 "kelvin": {
                     "name": "Kelvin",
                     "inputType": "number",
                     "suffix": "K",
-                    "from": function(k) { return k - 273.15; },
-                    "to": function (c) { return c + 273.15; }
+                    "from": function(k) { return parseFloat(k) - 273.15; },
+                    "to": function (c) { return parseFloat(c) + 273.15; }
                 }
             }
         },
@@ -56,8 +56,8 @@
                 "unix": {
                     "name": "Unix Timestamp (UTC)",
                     "inputType": "number",
-                    "from": function(u) { return u; },
-                    "to": function(u) { return u; }
+                    "from": function(u) { return parseInt(u); },
+                    "to": function(u) { return parseInt(u); }
                 },
                 "iso": {
                     "name": "ISO Timestamp (Local)",
@@ -74,6 +74,19 @@
             }
         },
         // "location": {}
+    };
+
+    function toBase(type, unit, val) {
+        return types[type].units[unit].from(val);
+    }
+
+    function toUnit(type, unit, val) {
+        return types[type].units[unit].to(val)
+    }
+
+    function convertUnit(type, unitIn, unitOut, val) {
+        var base = toBase(type, unitIn, val);
+        return toUnit(type, unitOut, base);
     }
 
     var suppressErrors = 0;
@@ -94,9 +107,9 @@
 
         // -----
 
-        // if the original already is normalized, skip
+        // if the original already is normalized, skip (and return clone)
         if (typeof $original.data('unitclone') != 'undefined')
-            return;
+            return $original.data('unitclone');
 
         // if this is a clone, also skip
         if (typeof $original.data('unitoriginal') != 'undefined')
@@ -122,10 +135,10 @@
 
         // 'unit' is the unit that all values will be converted to for the original field
         // if undefined, will be the base unit for that type (typically metric)
-        var unit = $original.data('unit') || types[unitType].base;
+        var originalUnit = $original.data('unit') || types[unitType].base;
         // 'unitpref' is the default unit that the cloned field will be shown with
         // if undefined, defaults to 'unit'
-        var unitPref = $original.data('unitpref') || unit;
+        var unitPref = $original.data('unitpref') || originalUnit;
         // 'unitsavail' are the units that the user will be able to choose from
         // if undefined, defaults to just the preferred unit
         var unitsAvail = $original.data('unitsavail') || unitPref;
@@ -154,10 +167,33 @@
         // -----
 
         // if the original field already has a value, make sure to convert it for the new field 
-        var originalVal = $original.val();
-        var originalValBase = types[unitType].units[unit].from(originalVal);
-        var cloneVal = types[unitType].units[cloneUnit].to(originalValBase)
-        $clone.val(cloneVal);  
+        $clone.val(convertUnit(
+            unitType,
+            originalUnit,
+            cloneUnit,
+            $original.val()
+        ));
+
+        // fix min and max values on clone
+
+        var originalMin = $original.attr('min');
+        var originalMax = $original.attr('max');
+
+        if (typeof originalMin != 'undefined')
+            $clone.attr('min', convertUnit(
+                unitType,
+                originalUnit,
+                cloneUnit,
+                originalMin
+            ));
+
+        if (typeof originalMax != 'undefined')
+            $clone.attr('max', convertUnit(
+                unitType,
+                originalUnit,
+                cloneUnit,
+                originalMax
+            ));
 
         // -----
 
@@ -180,18 +216,17 @@
             // 'this' now represents the clone
             var $clone = $(this);
             var $original = $clone.data('unitoriginal');
-            
+
             var unitType = $clone.data('unittype');
-
             var cloneUnit = $clone.data('unitpref');
-            var cloneVal = $clone.val();
-
-            var cloneValBase = types[unitType].units[cloneUnit].from(cloneVal); // unit -> base
- 
             var originalUnit = $original.data('unit');
-            var originalVal = types[unitType].units[originalUnit].to(cloneValBase);
 
-            $original.val(originalVal).change();
+            $original.val(convertUnit(
+                unitType,
+                cloneUnit,
+                originalUnit,
+                $clone.val()
+            )).change();
         });
         return true;
     };

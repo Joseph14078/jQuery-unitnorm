@@ -24,12 +24,14 @@
         <span id="temp-out">N/A</span>
 
         <h2>Length</h2>
+        <p>Also demonstrates min/max values being appropriately converted.</p>
         <h3>Input</h3>
-        <input id="length-in" name="length" class="normalize" type="number" step="0.1"
-            data-unittype="length" data-unit="meters"
-            data-unitpref="feet"
-            aria-describedby="length-in-desc"
-            value="10" />
+        <input  id="length-in" name="length" class="normalize"
+                type="number" step="0.1" min="0" max="20"
+                data-unittype="length" data-unit="meters"
+                data-unitpref="feet"
+                aria-describedby="length-in-desc"
+                value="10" />
         <span id="length-in-desc">Meters</span>
         <h3>Output (Meters)</h3>
         <span id="length-out">N/A</span>
