@@ -66,8 +66,14 @@
                         return (new Date(iso)).getTime();
                     },
                     "to": function(u) { // base (utc) -> unit (local)
-                        var isoString = (new Date(parseInt(u))).toISOString();
-                        isoString = isoString.substring(0, isoString.length - 2);
+                        var time = new Date();
+                        var isoString = (
+                            time.getFullYear() + '-' +
+                            ('0' + (time.getMonth() + 1)).slice(-2) + '-' +
+                            ('0' + time.getDate()).slice(-2) + 'T' +
+                            ('0' + time.getHours()).slice(-2) + ':' +
+                            ('0' + time.getMinutes()).slice(-2)
+                        );
                         return isoString;
                     }
                 }
