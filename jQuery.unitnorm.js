@@ -164,31 +164,24 @@
 
     var suppressErrors = 0;
 
-    $.fn.unitnorm = function() {
-        // selectors for multiple elements are handled weirdly by jquery
-        // have to iterate manually
-        if (this.length > 1) {
-            return this.each(function() {
-                $(this).unitnorm();
-            });
-        }
-
-        // -----
-
+    function init() {
         // just makes things easier to read
         var $original = this;
 
         // -----
 
         // if the original already is normalized, skip (and return clone)
-        if (typeof $original.data('unitclone') != 'undefined')
-            return $original.data('unitclone');
+        if (typeof $original.data('unitnorm-clone') != 'undefined')
+            return $original.data('unitnorm-clone');
 
         // if this is a clone, also skip
-        if (typeof $original.data('unitoriginal') != 'undefined')
+        if (typeof $original.data('unitnorm-original') != 'undefined')
             return;
 
         // -----
+
+        // use val if an input, otherwise use text
+        var valMethod = $original.is('input') ? 'val' : 'text';
 
         // 'unittype' is the type of value represented by the field
         // e.g. temperature, time, mass, etc.
@@ -221,10 +214,10 @@
 
         // clone the input
         var $clone = $original.clone();
-        $original.data('unitclone', $clone)
+        $original.data('unitnorm-clone', $clone);
         // give the clone a reference back to the original element
         // used for when the clone's value is changed
-        $clone.data('unitoriginal', $original);
+        $clone.data('unitnorm-original', $original);
         // remvove name so that the clone doesn't get submitted
         $clone.removeAttr('name');
         // also remove id to avoid confusion (!!!!)
@@ -240,11 +233,11 @@
         // -----
 
         // if the original field already has a value, make sure to convert it for the new field 
-        $clone.val(convertUnit(
+        $clone[valMethod](convertUnit(
             unitType,
             originalUnit,
             cloneUnit,
-            $original.val()
+            $original[valMethod]()
         ));
 
         // fix min and max values on clone
@@ -271,10 +264,12 @@
         // -----
 
         // if input has a unit description, it needs to be changed
-        var unitDesc = $clone.attr('aria-describedby');
+        var unitDesc = $original.attr('aria-describedby');
         if (typeof unitDesc != undefined) {
+            var $desc = $('#' + unitDesc); 
+            $original.data('unitnorm-descOriginal', $desc.text());
             var cloneUnitName = types[unitType].units[cloneUnit].name;
-            $('#' + unitDesc).text(cloneUnitName);
+            $desc.text(cloneUnitName);
         }
 
         // -----
@@ -285,46 +280,92 @@
         $original.hide();
 
         // here's where the ~M~A~G~I~C~ happens
-        $clone.change(function(e, originOriginal) {
+        $clone.on('change.unitnorm', function(e, originOriginal) {
             if (originOriginal) return;
 
             // 'this' now represents the clone
             var $clone = $(this);
-            var $original = $clone.data('unitoriginal');
+            var $original = $clone.data('unitnorm-original');
 
             var unitType = $clone.data('unittype');
             var cloneUnit = $clone.data('unitpref');
             var originalUnit = $original.data('unit');
 
-            $original.val(convertUnit(
+            $original[valMethod](convertUnit(
                 unitType,
                 cloneUnit,
                 originalUnit,
-                $clone.val()
-            )).trigger('change', true);//{
+                $clone[valMethod]()
+            )).trigger('change.unitnorm', true);//{
                // "originClone": true
             //});
         });
 
-        $original.change(function(e, originClone) {
+        $original.on('change.unitnorm', function(e, originClone) {
             if (originClone) return;
 
             // 'this' now represents the original
             var $original = $(this);
-            var $clone = $original.data('unitclone');
+            var $clone = $original.data('unitnorm-clone');
 
             var unitType = $clone.data('unittype');
             var cloneUnit = $clone.data('unitpref');
             var originalUnit = $original.data('unit');
 
-            $clone.val(convertUnit(
+            $clone[valMethod](convertUnit(
                 unitType,
                 originalUnit,
                 cloneUnit,
-                $original.val()
-            )).trigger('change', true);
+                $original[valMethod]()
+            )).trigger('change.unitnorm', true);
         });
-        
+
         return true;
+    }
+
+    function deinit() {
+        // just makes things easier to read
+        var $this = this;
+
+        // -----
+
+        // if this is the original
+        if (typeof $this.data('unitnorm-clone') != 'undefined') {
+            $this.removeData('unitnorm-clone')
+                .off('change.unitnorm')
+                .show();
+
+            // if input has a unit description, change it back
+            var unitDesc = $this.attr('aria-describedby');
+            if (typeof unitDesc != undefined) {
+                var $desc = $('#' + unitDesc);
+                $desc.text($this.data('unitnorm-descOriginal'));
+                $this.removeData('unitnorm-descOriginal');
+            }
+        }
+
+        // if this is a clone
+        if (typeof $this.data('unitnorm-original') != 'undefined')
+            $this.remove();
+    }
+
+    $.fn.unitnorm = function(action) {
+        // selectors for multiple elements are handled weirdly by jquery
+        // have to iterate manually
+        if (this.length > 1) {
+            return this.each(function() {
+                $(this).unitnorm(action);
+            });
+        }
+
+        switch(action) {
+            case 'deinit':
+                deinit.apply(this);
+                break;
+            case 'init':
+            default:
+                init.apply(this);
+                break;
+        }
     };
 }(jQuery));
