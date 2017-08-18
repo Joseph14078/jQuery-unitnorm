@@ -44,6 +44,17 @@
             value="1502085360000" />
         <h3>Output (UNIX Timestamp [UTC])</h3>
         <span id="time-out">N/A</span>
+
+        <h2>Location</h2>
+        <h3>Input</h3>
+        <input id="loc-in" name="loc" class="normalize" type="number"
+            data-unittype="location" data-unit="degrees"
+            data-unitpref="degMinSec"
+            aria-describedby="loc-in-desc"
+            value="45.12345" />
+        <span id="loc-in-desc">Degrees</span>
+        <h3>Output (Deg Min Sec)</h3>
+        <span id="loc-out">N/A</span>
     </form>
     <script>
         $('#temp-in').change(function() {
@@ -56,6 +67,10 @@
 
         $('#time-in').change(function() {
             $("#time-out").text($(this).val());
+        });
+
+        $('#loc-in').change(function() {
+            $("#loc-out").text($(this).val());
         });
 
         $('.normalize').unitnorm();

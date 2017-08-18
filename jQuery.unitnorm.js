@@ -1,6 +1,5 @@
 (function($) {
     var types = {
-        // "volume": {},
         "length": {
             "name": "Length",
             "suffix": "",
@@ -45,6 +44,74 @@
                     "suffix": "K",
                     "from": function(k) { return parseFloat(k) - 273.15; },
                     "to": function (c) { return parseFloat(c) + 273.15; }
+                }
+            }
+        },
+        "location": {
+            "name": "Location",
+            "suffix": "",
+            "base": "degrees",
+            "units": {
+                "degrees": {
+                    "name": "Degrees",
+                    "inputType": "number",
+                    "suffix": "°",
+                    "from": function(d) { return parseFloat(d); }, // unit -> base
+                    "to": function(d) { return parseFloat(d); } // base -> unit
+                },
+                "degMinSec": {
+                    "name": "Deg Min Sec",
+                    "inputType": "text",
+                    "suffix": "",
+                    "from": function(dm) {
+                        var degrees = minutes = seconds = 0;
+
+                        var values = dm.split(' ');
+                        for (var i = 0; i < values.length; i++) {
+                            var valueStr = values[i];
+                            
+                            if (valueStr.trim() == '') continue;
+                            
+                            var valueNum = parseFloat(valueStr);
+
+                            if (isNaN(valueNum)) continue;
+
+                            var valueUnit = valueStr.substring(
+                                valueNum.toString().length);
+
+                            // ------
+
+                            switch(valueUnit) {
+                                case 'deg':
+                                case 'd':
+                                case '\xB0':
+                                    degrees = valueNum;
+                                    break;
+                                case 'min':
+                                case 'm':
+                                case "'":
+                                    minutes = valueNum;
+                                    break;
+                                case 'sec':
+                                case 's':
+                                case '"':
+                                    seconds = valueNum;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        return degrees + (minutes / 60) + (seconds / 3600);
+                    },
+                    "to": function(d) {
+                        var degrees = Math.floor(d);
+                        var minutes = Math.floor((d - degrees) * 60);
+                        var seconds = (d - degrees - (minutes / 60)) * 3600;
+                        seconds = Math.round(seconds * 100) / 100; // restrict to 2 decimal places
+
+                        var output = degrees + '\xB0 '+ minutes + "' " + seconds + '"';
+                        return output;
+                    }
                 }
             }
         },
