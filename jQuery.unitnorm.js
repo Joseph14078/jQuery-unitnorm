@@ -285,7 +285,9 @@
         $original.hide();
 
         // here's where the ~M~A~G~I~C~ happens
-        $clone.change(function(e) {
+        $clone.change(function(e, originOriginal) {
+            if (originOriginal) return;
+
             // 'this' now represents the clone
             var $clone = $(this);
             var $original = $clone.data('unitoriginal');
@@ -299,8 +301,30 @@
                 cloneUnit,
                 originalUnit,
                 $clone.val()
-            )).change();
+            )).trigger('change', true);//{
+               // "originClone": true
+            //});
         });
+
+        $original.change(function(e, originClone) {
+            if (originClone) return;
+
+            // 'this' now represents the original
+            var $original = $(this);
+            var $clone = $original.data('unitclone');
+
+            var unitType = $clone.data('unittype');
+            var cloneUnit = $clone.data('unitpref');
+            var originalUnit = $original.data('unit');
+
+            $clone.val(convertUnit(
+                unitType,
+                originalUnit,
+                cloneUnit,
+                $original.val()
+            )).trigger('change', true);
+        });
+        
         return true;
     };
 }(jQuery));
