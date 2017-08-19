@@ -1,4 +1,18 @@
 (function($) {
+    var monthsFull = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "November",
+        "December"
+    ];
+    
     var types = {
         "length": {
             "name": "Length",
@@ -133,7 +147,7 @@
                         return (new Date(iso)).getTime();
                     },
                     "to": function(u) { // base (utc) -> unit (local)
-                        var time = new Date();
+                        var time = new Date(u);
                         var isoString = (
                             time.getFullYear() + '-' +
                             ('0' + (time.getMonth() + 1)).slice(-2) + '-' +
@@ -142,6 +156,50 @@
                             ('0' + time.getMinutes()).slice(-2)
                         );
                         return isoString;
+                    }
+                },
+                "human12hr": {
+                    "name": "Human Readable (12HR, Local)",
+                    "inputType": "text",
+                    "from": function(hr) {
+                        return (new Date(hr)).getTime();
+                    },
+                    "to": function(u) {
+                        var time = new Date(u);
+                       
+                        var hour24 = time.getHours();
+                        var ampm = hour24 >= 12 ? 'PM' : 'AM';
+
+                        var hour12 = hour24 % 12;
+
+                        var hrString = (
+                            ('0' + hour12).slice(-2) + ':' +
+                            ('0' + time.getMinutes()).slice(-2) + ':' +
+                            ('0' + time.getSeconds()).slice(-2) + ' ' +
+                            ampm + ', ' +
+                            monthsFull[time.getMonth()] + ' ' +
+                            time.getDate() + ', ' +
+                            time.getFullYear()
+                        );
+                    }
+                },
+                "human24hr": {
+                    "name": "Human Readable (24HR, Local)",
+                    "inputType": "text",
+                    "from": function(hr) {
+                        return (new Date(hr)).getTime();
+                    },
+                    "to": function(u) {
+                        var time = new Date(u);
+
+                        var hrString = (
+                            monthsFull[time.getMonth()] + ' ' +
+                            time.getDate() + ', ' +
+                            time.getFullYear() + ', ' +
+                            ('0' + time.getHours()).slice(-2) + ':' +
+                            ('0' + time.getMinutes()).slice(-2) + ':' +
+                            ('0' + time.getSeconds()).slice(-2)
+                        );
                     }
                 }
             }
