@@ -181,6 +181,8 @@
                             time.getDate() + ', ' +
                             time.getFullYear()
                         );
+
+                        return hrString;
                     }
                 },
                 "human24hr": {
@@ -200,6 +202,8 @@
                             ('0' + time.getMinutes()).slice(-2) + ':' +
                             ('0' + time.getSeconds()).slice(-2)
                         );
+
+                        return hrString;
                     }
                 }
             }
@@ -285,8 +289,10 @@
         $clone.removeAttr('data-unit');
 
         var cloneUnit = $clone.data('unitpref');
-        var newInputType = types[unitType].units[cloneUnit].inputType;
-        if (newInputType) $clone.attr('type', newInputType);
+        if (valMethod == 'val') {
+            var newInputType = types[unitType].units[cloneUnit].inputType;
+            if (newInputType) $clone.attr('type', newInputType);
+        }
 
         // -----
 
