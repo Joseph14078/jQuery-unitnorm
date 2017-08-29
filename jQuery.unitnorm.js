@@ -291,9 +291,15 @@
         return types[type].units[unit].to(val)
     }
 
-    function convertUnit(type, unitIn, unitOut, val) {
+    function convertUnit(type, unitIn, unitOut, val, round) {
         var base = toBase(type, unitIn, val);
-        return toUnit(type, unitOut, base);
+        var result = toUnit(type, unitOut, base);
+        console.log(round);
+        if (round) {
+            let roundMultiplier = Math.pow(10, round);
+            result = Math.round(result * roundMultiplier) / roundMultiplier;
+        }
+        return result;
     }
 
     var suppressErrors = 0;
@@ -378,13 +384,16 @@
         }
 
         // -----
-
+ 
         // if the original field already has a value, make sure to convert it for the new field 
+        var unitRound = parseInt($original.data('unitround'));
+
         $clone[valMethod](convertUnit(
             unitType,
             originalUnit,
             cloneUnit,
-            $original[valMethod]()
+            $original[valMethod](),
+            unitRound
         ));
 
         // fix min and max values on clone
@@ -397,7 +406,8 @@
                 unitType,
                 originalUnit,
                 cloneUnit,
-                originalMin
+                originalMin,
+                unitRound
             ));
 
         if (typeof originalMax != 'undefined')
@@ -405,7 +415,8 @@
                 unitType,
                 originalUnit,
                 cloneUnit,
-                originalMax
+                originalMax,
+                unitRound
             ));
 
         // -----
@@ -444,9 +455,7 @@
                 cloneUnit,
                 originalUnit,
                 $clone[valMethod]()
-            )).trigger('change', true);//{
-               // "originClone": true
-            //});
+            )).trigger('change', true);
         });
 
         $original.on('change.unitnorm', function(e, originClone) {
@@ -459,12 +468,14 @@
             var unitType = $clone.data('unittype');
             var cloneUnit = $clone.data('unitpref');
             var originalUnit = $original.data('unit');
+            var unitRound = parseInt($original.data('unitround'));
 
             $clone[valMethod](convertUnit(
                 unitType,
                 originalUnit,
                 cloneUnit,
-                $original[valMethod]()
+                $original[valMethod](),
+                unitRound
             )).trigger('change', true);
         });
 
