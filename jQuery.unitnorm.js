@@ -18,6 +18,10 @@
             "name": "Length",
             "suffix": "",
             "base": "meters",
+            "systems": {
+                "imperial": "feet",
+                "metric": "meters"
+            },
             "units": {
                 "meters": {
                     "name": "Meters",
@@ -37,6 +41,10 @@
             "name": "Temperature",
             "suffix": "°",
             "base": "celcius",
+            "systems": {
+                "imperial": "farenheit",
+                "metric": "celcius"
+            },
             "units": {
                 "celcius": {
                     "name": "Celcius",
@@ -346,7 +354,7 @@
         $clone.data('unitnorm-original', $original);
         // remvove name so that the clone doesn't get submitted
         $clone.removeAttr('name');
-        // also remove id to avoid confusion (!!!!)
+        // also remove id from clone to avoid confusion (!!!!)
         $clone.removeAttr('id');
         // also remove value
         $clone.removeAttr('value');
@@ -358,6 +366,15 @@
         if (valMethod == 'val') {
             var newInputType = types[unitType].units[cloneUnit].inputType;
             if (newInputType) $clone.attr('type', newInputType);
+        }
+
+        var unitType = $clone.data('unittype');
+        var cloneUnitSystem = $clone.data('unitprefsystem');
+
+        // if unit is specified via system, change unit to reflect that
+        if (cloneUnitSystem) {
+            cloneUnit = types[unitType].systems[cloneUnitSystem];
+            $clone.data('unitpref', cloneUnit);
         }
 
         // -----
@@ -419,6 +436,7 @@
 
             var unitType = $clone.data('unittype');
             var cloneUnit = $clone.data('unitpref');
+
             var originalUnit = $original.data('unit');
 
             $original[valMethod](convertUnit(
