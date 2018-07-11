@@ -87,7 +87,9 @@
                     "inputType": "text",
                     "suffix": "",
                     "from": function(dm) {
-                        var degrees = minutes = seconds = 0;
+                        var degrees = 0;
+                        var minutes = 0;
+                        var seconds = 0;
 
                         var negative = dm.substring(0, 1) == '-';
 
@@ -147,7 +149,9 @@
                     "inputType": "text",
                     "suffix": "",
                     "from": function(dm) {
-                        var degrees = minutes = seconds = 0;
+                        var degrees = 0; 
+                        var minutes = 0;
+                        var seconds = 0;
 
                         var negative = dm.substring(0, 1) == '-';
 
@@ -295,9 +299,8 @@
     function convertUnit(type, unitIn, unitOut, val, round) {
         var base = toBase(type, unitIn, val);
         var result = toUnit(type, unitOut, base);
-        console.log(round);
         if (round) {
-            let roundMultiplier = Math.pow(10, round);
+            var roundMultiplier = Math.pow(10, round);
             result = Math.round(result * roundMultiplier) / roundMultiplier;
         }
         return result;
@@ -305,7 +308,11 @@
 
     var suppressErrors = 0;
 
-    function init() {
+    function init(debug) {
+        function log(msg) {
+            if (debug) console.log(msg);
+        }
+
         // just makes things easier to read
         var $original = this;
 
@@ -329,12 +336,12 @@
         // see the 'types' variable above for a full list
         var unitType = $original.data('unittype');
         if (typeof unitType == 'undefined') {
-            console.log('unitnormalizer: data-unittype not defined.');
+            log('unitnormalizer: data-unittype not defined.');
             if (suppressErrors < 1) {
-                console.log('unitnormalizer: Possible values are:')
+                log('unitnormalizer: Possible values are:')
                 var typeKeys = Object.keys(types);
                 for (var i = 0; i < typeKeys.length; i++) {
-                    console.log('unitnormalizer:    - ' + typeKeys[i]);
+                    log('unitnormalizer:    - ' + typeKeys[i]);
                 }
             }
             return;
@@ -509,22 +516,22 @@
             $this.remove();
     }
 
-    $.fn.unitnorm = function(action) {
+    $.fn.unitnorm = function(action, debug) {
         // selectors for multiple elements are handled weirdly by jquery
         // have to iterate manually
         if (this.length > 1) {
             return this.each(function() {
-                $(this).unitnorm(action);
+                $(this).unitnorm(action, debug);
             });
         }
 
         switch(action) {
             case 'deinit':
-                deinit.apply(this);
+                deinit.apply(this, debug);
                 break;
             case 'init':
             default:
-                init.apply(this);
+                init.apply(this, debug);
                 break;
         }
     };

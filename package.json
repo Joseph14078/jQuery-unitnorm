@@ -1,0 +1,22 @@
+{
+  "name": "jquery-unitnorm",
+  "version": "1.0.0",
+  "description": "Automatically convert fields between units.",
+  "main": "jQuery.unitnorm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joseph14078/jquery-unitnorm.git"
+  },
+  "keywords": [
+    "jquery"
+  ],
+  "author": "Joseph Judge",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joseph14078/jquery-unitnorm/issues"
+  },
+  "homepage": "https://github.com/joseph14078/jquery-unitnorm#readme"
+}
