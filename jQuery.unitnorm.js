@@ -309,8 +309,9 @@
     var suppressErrors = 0;
 
     function init(debug) {
-        function log(msg) {
-            if (debug) console.log(msg);
+        function debugLog(msg) {
+            // if (debug) 
+            console.log(msg);
         }
 
         // just makes things easier to read
@@ -336,12 +337,12 @@
         // see the 'types' variable above for a full list
         var unitType = $original.data('unittype');
         if (typeof unitType == 'undefined') {
-            log('unitnormalizer: data-unittype not defined.');
+            debugLog('unitnormalizer: data-unittype not defined.');
             if (suppressErrors < 1) {
-                log('unitnormalizer: Possible values are:')
+                debugLog('unitnormalizer: Possible values are:')
                 var typeKeys = Object.keys(types);
                 for (var i = 0; i < typeKeys.length; i++) {
-                    log('unitnormalizer:    - ' + typeKeys[i]);
+                    debugLog('unitnormalizer:    - ' + typeKeys[i]);
                 }
             }
             return;
@@ -377,10 +378,10 @@
         $clone.removeAttr('data-unit');
 
         var cloneUnit = $clone.data('unitpref');
-        if (valMethod == 'val') {
+        if (cloneUnit && (valMethod == 'val')) {
             var newInputType = types[unitType].units[cloneUnit].inputType;
             if (newInputType) $clone.attr('type', newInputType);
-        }
+        } 
 
         var unitType = $clone.data('unittype');
         var cloneUnitSystem = $clone.data('unitprefsystem');

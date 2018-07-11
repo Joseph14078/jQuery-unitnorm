@@ -1,6 +1,6 @@
 {
   "name": "jquery-unitnorm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Automatically convert fields between units.",
   "main": "jQuery.unitnorm.js",
   "scripts": {
